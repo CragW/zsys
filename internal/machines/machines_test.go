@@ -617,10 +617,11 @@ func TestUpdateLastUsed(t *testing.T) {
 func TestCreateUserData(t *testing.T) {
 	t.Parallel()
 	tests := map[string]struct {
-		def      string
-		user     string
-		homePath string
-		cmdline  string
+		def         string
+		user        string
+		homePath    string
+		encryptHome bool
+		cmdline     string
 
 		setPropertyErr bool
 		createErr      bool
@@ -633,6 +634,7 @@ func TestCreateUserData(t *testing.T) {
 		"One machine add user dataset without userdata": {def: "m_without_userdata.yaml"},
 		"One machine with no user, only userdata":       {def: "m_with_userdata_only.yaml"},
 		"No attached userdata":                          {def: "m_no_attached_userdata_first_pool.yaml"},
+		"One machine add user encrypted home dataset":   {def: "m_with_userdata.yaml", encryptHome: true},
 
 		// Second pool cases
 		"User dataset on other pool":                       {def: "m_with_userdata_on_other_pool.yaml"},
@@ -685,7 +687,7 @@ func TestCreateUserData(t *testing.T) {
 			lzfs.ErrOnScan(tc.scanErr)
 			lzfs.ErrOnSetProperty(tc.setPropertyErr)
 
-			err = ms.CreateUserData(context.Background(), getDefaultValue(tc.user, "userfoo"), getDefaultValue(tc.homePath, "/home/foo"))
+			err = ms.CreateUserData(context.Background(), getDefaultValue(tc.user, "userfoo"), getDefaultValue(tc.homePath, "/home/foo"), tc.encryptHome)
 			if err != nil {
 				if !tc.wantErr {
 					t.Fatalf("expected no error but got: %v", err)
